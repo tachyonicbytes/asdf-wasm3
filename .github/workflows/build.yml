@@ -16,6 +16,14 @@ jobs:
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Install system packages on Ubuntu
+        if: ${{ runner.os == 'Linux' }}
+        run: sudo apt-get install cmake
+
+      - name: Install system packages on macOS
+        if: ${{ runner.os == 'macOS' }}
+        run: brew install cmake
+
       - name: asdf_plugin_test
         uses: asdf-vm/actions/plugin-test@v1
         with:

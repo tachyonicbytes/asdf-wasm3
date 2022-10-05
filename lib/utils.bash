@@ -43,19 +43,19 @@ install_version() {
   fi
 
   (
-      mkdir -p "$install_path"
+    mkdir -p "$install_path"
 
-      (cd "$install_path" && \
-      git clone --depth 1 --branch v"$version" "$GH_REPO" wasm3-dir && \
-      cd wasm3-dir && \
-      mkdir build && \
-      cd build && \
-      cmake .. && \
-      make && \
-      ls && \
-      pwd && \
-      cd "../.." && \
-      mv wasm3-dir/build/wasm3 . && \
+    (cd "$install_path" &&
+      git clone --depth 1 --branch v"$version" "$GH_REPO" wasm3-dir &&
+      cd wasm3-dir &&
+      mkdir build &&
+      cd build &&
+      cmake .. &&
+      make &&
+      ls &&
+      pwd &&
+      cd "../.." &&
+      mv wasm3-dir/build/wasm3 . &&
       rm -rf wasm3-dir)
 
     local tool_cmd
