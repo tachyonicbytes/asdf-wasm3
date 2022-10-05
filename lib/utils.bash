@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for wasm3.
 GH_REPO="https://github.com/wasm3/wasm3"
 TOOL_NAME="wasm3"
 TOOL_TEST="wasm3 --version"
@@ -27,25 +26,11 @@ sort_versions() {
 list_github_tags() {
   git ls-remote --tags --refs "$GH_REPO" |
     grep -o 'refs/tags/.*' | cut -d/ -f3- |
-    sed 's/^v//' # NOTE: You might want to adapt this sed to remove non-version strings from tags
+    sed 's/^v//'
 }
 
 list_all_versions() {
-  # TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-  # Change this function if wasm3 has other means of determining installable versions.
   list_github_tags
-}
-
-download_release() {
-  local version filename url
-  version="$1"
-  filename="$2"
-
-  # TODO: Adapt the release URL convention for wasm3
-  url="$GH_REPO/archive/v${version}.tar.gz"
-
-  echo "* Downloading $TOOL_NAME release $version..."
-  curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
 
 install_version() {
@@ -58,10 +43,21 @@ install_version() {
   fi
 
   (
-    mkdir -p "$install_path"
-    cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
+      mkdir -p "$install_path"
 
-    # TODO: Assert wasm3 executable exists.
+      (cd "$install_path" && \
+      git clone --depth 1 --branch v"$version" "$GH_REPO" wasm3-dir && \
+      cd wasm3-dir && \
+      mkdir build && \
+      cd build && \
+      cmake .. && \
+      make && \
+      ls && \
+      pwd && \
+      cd "../.." && \
+      mv wasm3-dir/build/wasm3 . && \
+      rm -rf wasm3-dir)
+
     local tool_cmd
     tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
     test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
